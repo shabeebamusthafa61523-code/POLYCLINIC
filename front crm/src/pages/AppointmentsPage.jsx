@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Stethoscope, CheckCircle2, User, Plus, Search, Filter, Phone, MessageSquare, AlertCircle } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Calendar, Clock, Stethoscope, CheckCircle2, User, Plus, Search, Filter, Phone, MessageSquare, AlertCircle, X } from 'lucide-react';
 import { polyclinicService } from '../services/polyclinicService';
 import ConfirmationModal from '../components/ConfirmationModal';
 
@@ -298,104 +299,123 @@ export default function AppointmentsPage() {
       </div>
 
       {/* Modal: Book Appointment */}
-      {showBookModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#111622] border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-emerald-500" /> Book New Appointment
-            </h2>
-            <p className="text-xs text-slate-400">
-              Only 1 active appointment permitted per patient. Completed or cancelled appointments unlock new slots.
-            </p>
-
-            <form onSubmit={handleBookSubmit} className="space-y-4">
+      {showBookModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md overflow-y-auto">
+          <div className="bg-white dark:bg-[#111622] border border-slate-200/80 dark:border-slate-800/80 rounded-3xl max-w-md w-full shadow-2xl my-auto max-h-[90vh] flex flex-col p-5 sm:p-6">
+            
+            {/* Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Select Patient *</label>
-                <select 
-                  required
-                  value={selectedPatientId}
-                  onChange={(e) => setSelectedPatientId(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
-                >
-                  <option value="">-- Choose Registered Patient --</option>
-                  {patients.map(p => (
-                    <option key={p._id} value={p._id}>
-                      {p.name} ({p.phone}) - {p.patientId}
-                    </option>
-                  ))}
-                </select>
+                <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-emerald-500" /> Book New Appointment
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Only 1 active appointment permitted per patient. Completed or cancelled appointments unlock new slots.
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowBookModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Select Doctor *</label>
-                <select 
-                  value={apptData.doctor}
-                  onChange={(e) => handleDoctorChange(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
-                >
-                  {doctors.map(d => (
-                    <option key={d._id} value={d.doctor?._id || d._id}>
-                      {d.doctorName} ({d.specialization}) - ₹{d.consultationFee}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+            {/* Form Body */}
+            <form onSubmit={handleBookSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden pt-4">
+              <div className="overflow-y-auto pr-1 space-y-4 flex-1">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Appointment Date *</label>
-                  <input 
-                    type="date" 
-                    required
-                    value={apptData.date}
-                    onChange={(e) => setApptData({ ...apptData, date: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Time Slot</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Patient *</label>
                   <select 
-                    value={apptData.timeSlot}
-                    onChange={(e) => setApptData({ ...apptData, timeSlot: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    required
+                    value={selectedPatientId}
+                    onChange={(e) => setSelectedPatientId(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-semibold"
                   >
-                    <option value="09:00 AM - 09:30 AM">09:00 AM - 09:30 AM</option>
-                    <option value="10:00 AM - 10:30 AM">10:00 AM - 10:30 AM</option>
-                    <option value="11:00 AM - 11:30 AM">11:00 AM - 11:30 AM</option>
-                    <option value="04:00 PM - 04:30 PM">04:00 PM - 04:30 PM</option>
-                    <option value="05:00 PM - 05:30 PM">05:00 PM - 05:30 PM</option>
+                    <option value="">-- Choose Registered Patient --</option>
+                    {patients.map(p => (
+                      <option key={p._id} value={p._id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                        {p.name} ({p.phone}) - {p.patientId}
+                      </option>
+                    ))}
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Doctor *</label>
+                  <select 
+                    value={apptData.doctor}
+                    onChange={(e) => handleDoctorChange(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-semibold"
+                  >
+                    {doctors.map(d => (
+                      <option key={d._id} value={d.doctor?._id || d._id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                        {d.doctorName} ({d.specialization}) - ₹{d.consultationFee}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Appointment Date *</label>
+                    <input 
+                      type="date" 
+                      required
+                      value={apptData.date}
+                      onChange={(e) => setApptData({ ...apptData, date: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Time Slot</label>
+                    <select 
+                      value={apptData.timeSlot}
+                      onChange={(e) => setApptData({ ...apptData, timeSlot: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    >
+                      <option value="09:00 AM - 09:30 AM" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">09:00 AM - 09:30 AM</option>
+                      <option value="10:00 AM - 10:30 AM" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">10:00 AM - 10:30 AM</option>
+                      <option value="11:00 AM - 11:30 AM" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">11:00 AM - 11:30 AM</option>
+                      <option value="04:00 PM - 04:30 PM" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">04:00 PM - 04:30 PM</option>
+                      <option value="05:00 PM - 05:30 PM" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">05:00 PM - 05:30 PM</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Consultation Fee (₹)</label>
+                  <input 
+                    type="number"
+                    value={apptData.consultationFee}
+                    onChange={(e) => setApptData({ ...apptData, consultationFee: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-bold"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Consultation Fee (₹)</label>
-                <input 
-                  type="number"
-                  value={apptData.consultationFee}
-                  onChange={(e) => setApptData({ ...apptData, consultationFee: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80 shrink-0 mt-3">
                 <button 
                   type="button" 
                   onClick={() => setShowBookModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
+                  className="px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-5 py-2 text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl transition"
+                  className="px-5 py-2.5 text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl transition shadow-md shadow-emerald-500/20"
                 >
                   Confirm Booking
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Confirmation Modal */}

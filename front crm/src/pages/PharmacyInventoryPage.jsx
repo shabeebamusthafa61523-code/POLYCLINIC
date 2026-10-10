@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Pill, Plus, AlertTriangle, Search, PackageCheck, Layers, Calendar, Truck } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Pill, Plus, AlertTriangle, Search, PackageCheck, Layers, Calendar, Truck, X } from 'lucide-react';
 import { polyclinicService } from '../services/polyclinicService';
 
 export default function PharmacyInventoryPage() {
@@ -174,92 +175,114 @@ export default function PharmacyInventoryPage() {
       </div>
 
       {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#111622] border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Pill className="w-4 h-4 text-emerald-500" /> Add Pharmacy / Supply Item
-            </h2>
-
-            <form onSubmit={handleCreateItem} className="space-y-4">
+      {showModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md overflow-y-auto">
+          <div className="bg-white dark:bg-[#111622] border border-slate-200/80 dark:border-slate-800/80 rounded-3xl max-w-lg w-full shadow-2xl my-auto max-h-[90vh] flex flex-col p-5 sm:p-6">
+            
+            {/* Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Item Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Amoxicillin 500mg or Surgical Gloves Box"
-                  value={newItem.name}
-                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
-                />
+                <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Pill className="w-4.5 h-4.5 text-emerald-500" /> Add Pharmacy / Supply Item
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Register new medicine stock, supplies, batch number, and pricing details.
+                </p>
               </div>
+              <button 
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3">
+            {/* Form Body */}
+            <form onSubmit={handleCreateItem} className="flex flex-col flex-1 min-h-0 overflow-hidden pt-4">
+              <div className="overflow-y-auto pr-1 space-y-4 flex-1">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
-                  <select
-                    value={newItem.category}
-                    onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
-                  >
-                    <option value="Medicine">Medicine</option>
-                    <option value="Consumable">Consumable</option>
-                    <option value="Equipment">Equipment</option>
-                    <option value="Supplies">Supplies</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Batch Number</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Item Name *</label>
                   <input
                     type="text"
-                    value={newItem.batchNumber}
-                    onChange={(e) => setNewItem({ ...newItem, batchNumber: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    required
+                    placeholder="e.g. Amoxicillin 500mg or Surgical Gloves Box"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-semibold"
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                    <select
+                      value={newItem.category}
+                      onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    >
+                      <option value="Medicine" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Medicine</option>
+                      <option value="Consumable" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Consumable</option>
+                      <option value="Equipment" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Equipment</option>
+                      <option value="Supplies" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Supplies</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Batch Number</label>
+                    <input
+                      type="text"
+                      value={newItem.batchNumber}
+                      onChange={(e) => setNewItem({ ...newItem, batchNumber: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stock Quantity *</label>
+                    <input
+                      type="number"
+                      required
+                      value={newItem.quantity}
+                      onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Selling Price (₹) *</label>
+                    <input
+                      type="number"
+                      required
+                      value={newItem.sellingPrice}
+                      onChange={(e) => setNewItem({ ...newItem, sellingPrice: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-bold"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Stock Quantity *</label>
-                  <input
-                    type="number"
-                    required
-                    value={newItem.quantity}
-                    onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Selling Price (₹) *</label>
-                  <input
-                    type="number"
-                    required
-                    value={newItem.sellingPrice}
-                    onChange={(e) => setNewItem({ ...newItem, sellingPrice: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80 shrink-0 mt-3">
                 <button 
                   type="button" 
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
+                  className="px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-5 py-2 text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl transition"
+                  className="px-5 py-2.5 text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl transition shadow-md shadow-emerald-500/20"
                 >
                   Add Item
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

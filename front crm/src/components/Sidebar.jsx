@@ -109,12 +109,14 @@ const menuItems = [
   { icon: Receipt, label: 'Billing & Invoices', path: '/billing', category: 'Pharmacy & Billing' },
   { icon: Wallet, label: 'Clinic Accounts & Expenses', path: '/accounts', category: 'Pharmacy & Billing' },
   { icon: CreditCard, label: 'Payslips', path: '/payslips', category: 'Pharmacy & Billing' },
+  { icon: FileText, label: 'Personal Payslip', path: '/my-payslip', category: 'Pharmacy & Billing' },
 
   // --- STAFF & DOCTORS ---
   { icon: UserCog, label: 'Doctors & Staff', path: '/doctors-staff', category: 'Staff & Doctors' },
   { icon: UserCheck, label: 'Staff Attendance', path: '/staff-attendance', category: 'Staff & Doctors' },
   { icon: Users, label: 'Users & Roles', path: '/users', category: 'Staff & Doctors' },
   { icon: Building, label: 'Departments', path: '/departments', category: 'Staff & Doctors' },
+  { icon: ShieldCheck, label: 'Permission Configuration', path: '/permissions', category: 'Staff & Doctors' },
 
   // --- REPORTS & OPERATIONS ---
   { icon: BarChart3, label: 'Polyclinic Analytics', path: '/polyclinic-reports', category: 'Reports & Operations' },
@@ -444,7 +446,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
       }
       
       const isPrivilegedUser = ['0', '1', '2', '10', 'admin', 'hr', 'superadmin', 'manager', 'team_lead', 'teamlead', 'tl', 'md'].includes(currentUserRole) || !!userObj.isTeamLead;
-      const DEFAULT_EMPLOYEE_LABELS = ['Dashboard', 'Task Assign', 'Notifications', 'Attendance', 'Leave Requests', 'My LMS Learning', 'Employee Training'];
+      const DEFAULT_EMPLOYEE_LABELS = ['Dashboard', 'Task Assign', 'Notifications', 'Attendance', 'Leave Requests', 'My LMS Learning', 'Employee Training', 'Personal Payslip'];
 
       const visible = menuItems.filter(item => {
         if (item.excludeRoles && item.excludeRoles.includes(currentUserRole)) {

@@ -55,6 +55,7 @@ import NotificationPage from './pages/NotificationPage';
 import PerformanceDashboard from './pages/PerformanceDashboard';
 import UserPermissionsPage from './pages/UserPermissionsPage';
 import SidebarPermissionsPage from './pages/SidebarPermissionsPage';
+import PermissionsPage from './pages/PermissionsPage';
 import MdDashboard from './pages/MdDashboard';
 import AccountsPage from './pages/AccountsPage';
 import LeavesPage from './pages/LeavesPage';
@@ -224,7 +225,8 @@ function App() {
         <Route path="/todo" element={<ProtectedRoute><MainLayout><RestrictedRoute><Todo /></RestrictedRoute></MainLayout></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><MainLayout><RestrictedRoute><Users /></RestrictedRoute></MainLayout></ProtectedRoute>} />
         <Route path="/users/:userId" element={<ProtectedRoute><MainLayout><RestrictedRoute><UserDetailPage /></RestrictedRoute></MainLayout></ProtectedRoute>} />
-        <Route path="/sidebar-permissions" element={<ProtectedRoute><MainLayout><RestrictedRoute><SidebarPermissionsPage /></RestrictedRoute></MainLayout></ProtectedRoute>} />
+        <Route path="/sidebar-permissions" element={<ProtectedRoute><MainLayout><RestrictedRoute><PermissionsPage /></RestrictedRoute></MainLayout></ProtectedRoute>} />
+        <Route path="/permissions" element={<ProtectedRoute><MainLayout><RestrictedRoute><PermissionsPage /></RestrictedRoute></MainLayout></ProtectedRoute>} />
         <Route path="/permissions/:userId" element={<ProtectedRoute><MainLayout><RestrictedRoute><UserPermissionsPage /></RestrictedRoute></MainLayout></ProtectedRoute>} />
         <Route path="/leads" element={<ProtectedRoute><MainLayout><RestrictedRoute><Leads /></RestrictedRoute></MainLayout></ProtectedRoute>} />
         <Route path="/leads-telecaller" element={<ProtectedRoute><MainLayout><RestrictedRoute><LeadsTelecaller /></RestrictedRoute></MainLayout></ProtectedRoute>} />

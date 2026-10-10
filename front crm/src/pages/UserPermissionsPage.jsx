@@ -22,69 +22,40 @@ const getApiEndpoint = (path) => {
 };
 
 const ALL_SIDEBAR_ITEMS = [
-  // Polyclinic & Healthcare
-  { label: 'Polyclinic Dashboard', path: '/polyclinic-dashboard', category: 'Polyclinic Healthcare', desc: 'Central Polyclinic & Healthcare operations dashboard' },
-  { label: 'Reception Queue', path: '/reception-queue', category: 'Polyclinic Healthcare', desc: 'Live patient check-in token waiting queue dispatch board' },
-  { label: 'Patient Enquiry CRM', path: '/patient-enquiries', category: 'Polyclinic Healthcare', desc: 'Patient lead enquiry registration & appointment conversion' },
-  { label: 'Appointments', path: '/appointments', category: 'Polyclinic Healthcare', desc: 'Doctor slot booking & appointment management' },
-  { label: 'Doctor EMR Consultation', path: '/doctor-emr', category: 'Polyclinic Healthcare', desc: 'Electronic medical records, symptoms, vitals & diagnosis' },
-  { label: 'Digital Prescriptions', path: '/prescriptions', category: 'Polyclinic Healthcare', desc: 'Structured digital prescriptions with dosage & frequency' },
-  { label: 'Laboratory & Diagnostics', path: '/laboratory', category: 'Polyclinic Healthcare', desc: 'Diagnostic test requests, sample collection & report entry' },
-  { label: 'Pharmacy Inventory', path: '/pharmacy-inventory', category: 'Polyclinic Healthcare', desc: 'Medicine & clinic consumable stock, batch & low stock alerts' },
-  { label: 'Billing & Invoices', path: '/billing', category: 'Polyclinic Healthcare', desc: 'Consolidated patient healthcare billing & receipts' },
-  { label: 'Doctors & Staff', path: '/doctors-staff', category: 'Polyclinic Healthcare', desc: 'Doctor schedules, fees & visiting doctor payouts' },
-  { label: 'Patient Follow-ups', path: '/patient-followups', category: 'Polyclinic Healthcare', desc: 'Post-consultation follow-up reminders & care plans' },
-  { label: 'Polyclinic Analytics', path: '/polyclinic-reports', category: 'Polyclinic Healthcare', desc: 'Polyclinic revenue, patient counts & inventory analytics' },
+  // --- OVERVIEW & QUEUE ---
+  { label: 'Polyclinic Dashboard', path: '/polyclinic-dashboard', category: 'Overview & Queue', desc: 'Central Polyclinic & Healthcare operations dashboard' },
+  { label: 'Reception Queue', path: '/reception-queue', category: 'Overview & Queue', desc: 'Live patient check-in token waiting queue dispatch board' },
+  { label: 'Notifications', path: '/notifications', category: 'Overview & Queue', desc: 'System alerts, notifications & messages' },
+  { label: 'Leave Requests', path: '/leaves', category: 'Overview & Queue', desc: 'Leave request application & approval tracking' },
 
-  // Dashboards
-  { label: 'Dashboard', path: '/dashboard', category: 'Dashboards', desc: 'Main CRM overview & key metrics' },
-  { label: 'Admin Dashboard', path: '/dashboard', category: 'Dashboards', desc: 'Admin panel with full CRM overview & controls' },
-  { label: 'MD Dashboard', path: '/md-dashboard', category: 'Dashboards', desc: 'Managing Director executive overview & analytics' },
-  { label: 'HR Dashboard', path: '/hr-dashboard', category: 'Dashboards', desc: 'HR overview dashboard & attendance stats' },
-  { label: 'Lead Dashboard', path: '/lead-dashboard', category: 'Dashboards', desc: 'Lead generation & conversion metrics' },
-  { label: 'Marketing Dashboard', path: '/marketing-dashboard', category: 'Dashboards', desc: 'Marketing campaigns & lead channels' },
-  { label: 'Counselor Dashboard', path: '/counselor-dashboard', category: 'Dashboards', desc: 'Academic counselor dashboard & student conversions' },
-  { label: 'Accountant Dashboard', path: '/accountant-dashboard', category: 'Dashboards', desc: 'Accountant financial dashboard, cashbook & revenue metrics' },
-  { label: 'Dev Dashboard', path: '/developer-dashboard', category: 'Dashboards', desc: 'Developer task tracking & commit status' },
-  { label: 'GD Dashboard', path: '/graphic-designer-dashboard', category: 'Dashboards', desc: 'Graphic design project & asset tracker' },
-  { label: 'Video Dashboard', path: '/videographer-dashboard', category: 'Dashboards', desc: 'Videography project & editing status' },
+  // --- PATIENT CRM & BOOKING ---
+  { label: 'Patient Enquiry CRM', path: '/patient-enquiries', category: 'Patient CRM & Booking', desc: 'Patient lead enquiry registration & appointment conversion' },
+  { label: 'Appointments', path: '/appointments', category: 'Patient CRM & Booking', desc: 'Doctor slot booking & appointment management' },
+  { label: 'Patient Follow-ups', path: '/patient-followups', category: 'Patient CRM & Booking', desc: 'Post-consultation follow-up reminders & care plans' },
 
-  // Management & Operations
-  { label: 'Approvals', path: '/approvals', category: 'Management', desc: 'MD Executive approvals for leaves & salary payments' },
-  { label: 'Clients', path: '/clients', category: 'Management', desc: 'Client directory & company profiles' },
-  { label: 'Projects', path: '/projects', category: 'Management', desc: 'Project tracking & milestones' },
-  { label: 'Content Calendar', path: '/calendar-work', category: 'Management', desc: 'Social media & marketing content scheduling calendar' },
-  { label: 'Users', path: '/users', category: 'Management', desc: 'Employee & user account management' },
-  { label: 'Departments', path: '/departments', category: 'Management', desc: 'Department hierarchy & manager assignments' },
-  { label: 'Sidebar Permissions', path: '/sidebar-permissions', category: 'Management', desc: 'Custom user menu permission configuration' },
-  { label: 'Task Assign', path: '/todo', category: 'Operations', desc: 'Task assignment & attachment view' },
-  { label: 'Daily Operations OS', path: '/daily-operations', category: 'Operations', desc: 'MD & Management daily operations overview, routines & briefing review' },
-  { label: 'TL Daily Operations', path: '/tl-daily-operations', category: 'Operations', desc: 'Team Lead department routine checklist, briefing table & EOD closures' },
+  // --- CLINICAL EMR & LAB ---
+  { label: 'Doctor EMR Consultation', path: '/doctor-emr', category: 'Clinical EMR & Lab', desc: 'Electronic medical records, symptoms, vitals & diagnosis' },
+  { label: 'Digital Prescriptions', path: '/prescriptions', category: 'Clinical EMR & Lab', desc: 'Structured digital prescriptions with dosage & frequency' },
+  { label: 'Laboratory & Diagnostics', path: '/laboratory', category: 'Clinical EMR & Lab', desc: 'Diagnostic test requests, sample collection & report entry' },
 
-  // HR & Recruitment
-  { label: 'Staff Attendance', path: '/staff-attendance', category: 'HR', desc: 'Mark and manage daily staff attendance logs & roster' },
-  { label: 'Attendance', path: '/attendance', category: 'HR', desc: 'Daily attendance clock-in/out logs' },
-  { label: 'Leave Requests', path: '/leaves', category: 'HR', desc: 'Leave request application & approvals' },
-  { label: 'Recruitment', path: '/recruitment', category: 'HR', desc: 'Recruitment directory, candidate pipeline & offer letters' },
-  { label: 'Employee Training', path: '/hr/training', category: 'HR', desc: 'Internal staff training & development courses' },
-  { label: 'Student Attendance', path: '/student-attendance', category: 'HR', desc: 'Student batch attendance logs' },
+  // --- PHARMACY & BILLING ---
+  { label: 'Pharmacy Inventory', path: '/pharmacy-inventory', category: 'Pharmacy & Billing', desc: 'Medicine stock, clinic consumables, batch & low stock alerts' },
+  { label: 'Billing & Invoices', path: '/billing', category: 'Pharmacy & Billing', desc: 'Consolidated patient healthcare billing & receipts' },
+  { label: 'Clinic Accounts & Expenses', path: '/accounts', category: 'Pharmacy & Billing', desc: 'Expense management, salary & cash book overview' },
+  { label: 'Payslips', path: '/payslips', category: 'Pharmacy & Billing', desc: 'Employee payslip generation & disbursal records' },
+  { label: 'Personal Payslip', path: '/my-payslip', category: 'Pharmacy & Billing', desc: 'Personal confidential salary slip portal for individual employees' },
 
-  // Leads & Sales
-  { label: 'Client Leads', path: '/client-leads', category: 'Leads', desc: 'Client lead pipeline & inquiries' },
-  { label: 'Student Leads', path: '/leads-telecaller', category: 'Leads', desc: 'Telecaller assigned lead calls' },
+  // --- STAFF & DOCTORS ---
+  { label: 'Doctors & Staff', path: '/doctors-staff', category: 'Staff & Doctors', desc: 'Doctor schedules, fees & visiting doctor payouts' },
+  { label: 'Staff Attendance', path: '/staff-attendance', category: 'Staff & Doctors', desc: 'Daily staff attendance logs & roster management' },
+  { label: 'Users & Roles', path: '/users', category: 'Staff & Doctors', desc: 'Employee profiles, role assignments & accounts' },
+  { label: 'Departments', path: '/departments', category: 'Staff & Doctors', desc: 'Department hierarchy & manager assignments' },
+  { label: 'Permission Configuration', path: '/permissions', category: 'Staff & Doctors', desc: 'Custom user menu permission configuration' },
 
-  // Analytics & Reports
-  { label: 'KPI Analytics', path: '/performance-dashboard', category: 'Analytics', desc: 'Quantitative KPI score & performance' },
-  { label: 'AI Reports', path: '/ai-report', category: 'Analytics', desc: 'Automated AI reports & summaries' },
-  { label: 'Daily Shift Report', path: '/daily-shift-report', category: 'Reports', desc: 'Official daily shift report & operational log' },
-
-  // Finance & Accounts
-  { label: 'Accounts', path: '/accounts', category: 'Finance', desc: 'Expense management, salary & cash book overview' },
-  { label: 'Payslips', path: '/payslips', category: 'Finance', desc: 'Employee payslip generation & disbursal records' },
-  { label: 'Personal Payslip', path: '/my-payslip', category: 'Finance', desc: 'Personal salary slip portal for individual employees' },
-
-  // General
-  { label: 'Notifications', path: '/notifications', category: 'General', desc: 'System alerts & messages' }
+  // --- REPORTS & OPERATIONS ---
+  { label: 'Polyclinic Analytics', path: '/polyclinic-reports', category: 'Reports & Operations', desc: 'Revenue, patient counts & inventory analytics' },
+  { label: 'AI Health Insights', path: '/ai-report', category: 'Reports & Operations', desc: 'Automated AI reports & diagnostic summaries' },
+  { label: 'Task Assignment', path: '/todo', category: 'Reports & Operations', desc: 'Task assignment, status tracking & attachment review' }
 ];
 
 const UserPermissionsPage = () => {

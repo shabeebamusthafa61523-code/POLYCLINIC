@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Stethoscope, Users, Calendar, Clock, DollarSign, Award, CheckCircle2, UserCheck, Plus, X, Shield, Phone, Mail } from 'lucide-react';
 import { polyclinicService } from '../services/polyclinicService';
 import ConfirmationModal from '../components/ConfirmationModal';
@@ -165,27 +166,32 @@ export default function DoctorsStaffPage() {
       </div>
 
       {/* Modal: Add Clinic Staff & Doctor */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
-          <div className="bg-white dark:bg-[#111622] border border-slate-200/80 dark:border-slate-800/80 rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl relative my-auto animate-in fade-in zoom-in duration-150">
+      {showAddModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md overflow-y-auto">
+          <div className="bg-white dark:bg-[#111622] border border-slate-200/80 dark:border-slate-800/80 rounded-3xl max-w-lg w-full shadow-2xl my-auto max-h-[90vh] flex flex-col p-5 sm:p-6">
             
-            {/* Header - Fixed Top */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4 shrink-0">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Stethoscope className="w-4.5 h-4.5 text-emerald-500" /> Register Clinic Staff & Doctor
-              </h2>
+            {/* Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Stethoscope className="w-4.5 h-4.5 text-emerald-500" /> Register Clinic Staff & Doctor
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Set specialization, consultation fee, payout rate, and available working days.
+                </p>
+              </div>
               <button 
                 type="button"
                 onClick={() => setShowAddModal(false)}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Body - Scrollable */}
-            <form onSubmit={handleCreateStaff} className="flex flex-col flex-1 min-h-0">
-              <div className="p-6 overflow-y-auto space-y-4 flex-1">
+            <form onSubmit={handleCreateStaff} className="flex flex-col flex-1 min-h-0 overflow-hidden pt-4">
+              <div className="overflow-y-auto pr-1 space-y-4 flex-1">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Doctor / Staff Name *</label>
                   <input
@@ -194,7 +200,7 @@ export default function DoctorsStaffPage() {
                     placeholder="e.g. Dr. Rajesh Gupta"
                     value={form.doctorName}
                     onChange={(e) => setForm({ ...form, doctorName: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-semibold"
                   />
                 </div>
 
@@ -206,7 +212,7 @@ export default function DoctorsStaffPage() {
                     placeholder="e.g. Cardiology & General Medicine"
                     value={form.specialization}
                     onChange={(e) => setForm({ ...form, specialization: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-semibold"
                   />
                 </div>
 
@@ -217,7 +223,7 @@ export default function DoctorsStaffPage() {
                       type="number"
                       value={form.consultationFee}
                       onChange={(e) => setForm({ ...form, consultationFee: Number(e.target.value) })}
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-bold"
                     />
                   </div>
                   <div>
@@ -226,7 +232,7 @@ export default function DoctorsStaffPage() {
                       type="number"
                       value={form.honorariumRate}
                       onChange={(e) => setForm({ ...form, honorariumRate: Number(e.target.value) })}
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-bold"
                     />
                   </div>
                 </div>
@@ -255,25 +261,26 @@ export default function DoctorsStaffPage() {
                 </div>
               </div>
 
-              {/* Footer - Fixed Bottom */}
-              <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 shrink-0 rounded-b-3xl">
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80 shrink-0 mt-3">
                 <button 
                   type="button" 
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-xl transition"
+                  className="px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-5 py-2 text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl transition shadow-sm"
+                  className="px-5 py-2.5 text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-slate-950 rounded-xl transition shadow-md shadow-emerald-500/20"
                 >
                   Confirm Registration
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Confirmation Modal */}
