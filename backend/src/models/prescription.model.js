@@ -8,7 +8,9 @@ const prescriptionSchema = new mongoose.Schema({
   },
   emr: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'EMR'
+    ref: 'EMR',
+    default: null,
+    set: v => (v && mongoose.isValidObjectId(v) ? v : null)
   },
   patient: {
     type: mongoose.Schema.Types.ObjectId,
@@ -18,7 +20,9 @@ const prescriptionSchema = new mongoose.Schema({
   patientName: { type: String, required: true },
   doctor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    default: null,
+    set: v => (v && mongoose.isValidObjectId(v) ? v : null)
   },
   doctorName: { type: String, required: true },
   date: { type: Date, default: Date.now },

@@ -14,7 +14,9 @@ const billingSchema = new mongoose.Schema({
   patientName: { type: String, required: true },
   appointment: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Appointment'
+    ref: 'Appointment',
+    default: null,
+    set: v => (v && mongoose.isValidObjectId(v) ? v : null)
   },
   items: [{
     description: { type: String, required: true },

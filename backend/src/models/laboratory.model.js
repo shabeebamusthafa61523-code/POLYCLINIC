@@ -14,7 +14,9 @@ const laboratorySchema = new mongoose.Schema({
   patientName: { type: String, required: true },
   doctor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    default: null,
+    set: v => (v && mongoose.isValidObjectId(v) ? v : null)
   },
   doctorName: { type: String, default: '' },
   testName: { type: String, required: true },

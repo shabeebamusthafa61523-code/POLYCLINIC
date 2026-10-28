@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Patient from '../models/patient.model.js';
 import Appointment from '../models/appointment.model.js';
 import EMR from '../models/emr.model.js';
@@ -386,16 +387,21 @@ export const createEmrRecord = async (req, res) => {
     if (req.body.followUpDate) {
       const patient = await Patient.findById(req.body.patient);
       if (patient) {
-        await FollowUp.create({
+        const followUpPayload = {
           patient: patient._id,
           patientName: patient.name,
           patientPhone: patient.phone,
-          doctor: doctorId,
           doctorName: doctorName || 'Dr. Rajesh Gupta',
-          appointment: req.body.appointment,
           followUpDate: req.body.followUpDate,
           purpose: 'Scheduled Consultation Follow-up'
-        });
+        };
+        if (doctorId && mongoose.isValidObjectId(doctorId)) {
+          followUpPayload.doctor = doctorId;
+        }
+        if (req.body.appointment && mongoose.isValidObjectId(req.body.appointment)) {
+          followUpPayload.appointment = req.body.appointment;
+        }
+        await FollowUp.create(followUpPayload);
       }
     }
 
@@ -456,7 +462,11 @@ export const createLabTest = async (req, res) => {
   try {
     const count = await Laboratory.countDocuments();
     const labTestNo = `LAB-${1001 + count}`;
-    const labTest = await Laboratory.create({ ...req.body, labTestNo });
+    const payload = { ...req.body, labTestNo };
+    if (!payload.doctor || !mongoose.isValidObjectId(payload.doctor)) {
+      delete payload.doctor;
+    }
+    const labTest = await Laboratory.create(payload);
     res.status(201).json({ success: true, labTest });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -529,7 +539,7 @@ export const createInvoice = async (req, res) => {
     const pendingAmount = netAmount - paidAmount;
     const status = pendingAmount <= 0 ? 'Paid' : (paidAmount > 0 ? 'Partially Paid' : 'Pending');
 
-    const invoice = await Billing.create({
+    const billingPayload = {
       ...req.body,
       invoiceNo,
       items,
@@ -538,7 +548,12 @@ export const createInvoice = async (req, res) => {
       paidAmount,
       pendingAmount,
       status
-    });
+    };
+    if (!billingPayload.appointment || !mongoose.isValidObjectId(billingPayload.appointment)) {
+      delete billingPayload.appointment;
+    }
+
+    const invoice = await Billing.create(billingPayload);
 
     res.status(201).json({ success: true, invoice });
   } catch (err) {
@@ -586,7 +601,14 @@ export const getFollowUps = async (req, res) => {
 
 export const createFollowUp = async (req, res) => {
   try {
-    const followUp = await FollowUp.create(req.body);
+    const payload = { ...req.body };
+    if (!payload.doctor || !mongoose.isValidObjectId(payload.doctor)) {
+      delete payload.doctor;
+    }
+    if (!payload.appointment || !mongoose.isValidObjectId(payload.appointment)) {
+      delete payload.appointment;
+    }
+    const followUp = await FollowUp.create(payload);
     res.status(201).json({ success: true, followUp });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -595,7 +617,14 @@ export const createFollowUp = async (req, res) => {
 
 export const updateFollowUp = async (req, res) => {
   try {
-    const followUp = await FollowUp.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const payload = { ...req.body };
+    if (payload.doctor !== undefined && (!payload.doctor || !mongoose.isValidObjectId(payload.doctor))) {
+      payload.doctor = null;
+    }
+    if (payload.appointment !== undefined && (!payload.appointment || !mongoose.isValidObjectId(payload.appointment))) {
+      payload.appointment = null;
+    }
+    const followUp = await FollowUp.findByIdAndUpdate(req.params.id, payload, { new: true });
     res.json({ success: true, followUp });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

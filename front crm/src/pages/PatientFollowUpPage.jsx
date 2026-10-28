@@ -51,6 +51,7 @@ export default function PatientFollowUpPage() {
   const [editForm, setEditForm] = useState({
     patientName: '',
     patientPhone: '',
+    doctor: '',
     doctorName: '',
     followUpDate: '',
     purpose: '',
@@ -97,6 +98,7 @@ export default function PatientFollowUpPage() {
     setEditForm({
       patientName: item.patientName || '',
       patientPhone: item.patientPhone || '',
+      doctor: (item.doctor?._id || item.doctor || '') ? String(item.doctor?._id || item.doctor) : '',
       doctorName: item.doctorName || 'Dr. Rajesh Gupta',
       followUpDate: dateFormatted,
       purpose: item.purpose || '',
@@ -119,7 +121,10 @@ export default function PatientFollowUpPage() {
       variant: 'primary',
       onConfirm: async () => {
         try {
-          const res = await polyclinicService.updateFollowUp(selectedFollowUp._id, editForm);
+          const payload = { ...editForm };
+          if (!payload.doctor) delete payload.doctor;
+          if (!payload.appointment) delete payload.appointment;
+          const res = await polyclinicService.updateFollowUp(selectedFollowUp._id, payload);
           if (res.success) {
             setShowEditModal(false);
             setSelectedFollowUp(null);
@@ -149,15 +154,31 @@ export default function PatientFollowUpPage() {
         }
       }
 
-      const res = await polyclinicService.createFollowUp({
+      const payload = {
         ...scheduleForm,
         patient: pId || patients[0]?._id,
         patientName: pName || 'Patient',
         patientPhone: pPhone || '+91 9876543210'
-      });
+      };
+
+      if (!payload.doctor) delete payload.doctor;
+      if (!payload.appointment) delete payload.appointment;
+
+      const res = await polyclinicService.createFollowUp(payload);
 
       if (res.success) {
         setShowScheduleModal(false);
+        setScheduleForm({
+          patient: '',
+          patientName: '',
+          patientPhone: '',
+          doctor: '',
+          doctorName: '',
+          followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          purpose: 'Post-consultation recovery check-up',
+          notes: '',
+          status: 'Pending'
+        });
         fetchData();
         setConfirmModal({
           isOpen: true,
@@ -421,12 +442,50 @@ export default function PatientFollowUpPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned Doctor</label>
-                    <input 
-                      type="text" 
-                      value={editForm.doctorName}
-                      onChange={(e) => setEditForm({ ...editForm, doctorName: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                    />
+                    {doctors && doctors.length > 0 ? (
+                      <div className="space-y-1.5">
+                        <select
+                          value={editForm.doctor || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const doc = doctors.find(d => String(d.doctor?._id || d.doctor || d._id) === val);
+                            setEditForm({
+                              ...editForm,
+                              doctor: val,
+                              doctorName: doc ? (doc.doctorName || doc.doctor?.name || '') : editForm.doctorName
+                            });
+                          }}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        >
+                          <option value="">-- Choose Doctor (Optional) --</option>
+                          {doctors.map(d => {
+                            const val = String(d.doctor?._id || d.doctor || d._id);
+                            return (
+                              <option key={d._id} value={val}>
+                                {d.doctorName || d.doctor?.name || 'Doctor'} {d.specialization ? `(${d.specialization})` : ''}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        {!editForm.doctor && (
+                          <input 
+                            type="text" 
+                            placeholder="Or enter doctor name manually"
+                            value={editForm.doctorName}
+                            onChange={(e) => setEditForm({ ...editForm, doctorName: e.target.value })}
+                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <input 
+                        type="text" 
+                        placeholder="Dr. Rajesh Gupta"
+                        value={editForm.doctorName}
+                        onChange={(e) => setEditForm({ ...editForm, doctorName: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -582,13 +641,50 @@ export default function PatientFollowUpPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Doctor Name</label>
-                    <input 
-                      type="text"
-                      placeholder="Dr. Rajesh Gupta"
-                      value={scheduleForm.doctorName}
-                      onChange={(e) => setScheduleForm({ ...scheduleForm, doctorName: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                    />
+                    {doctors && doctors.length > 0 ? (
+                      <div className="space-y-1.5">
+                        <select
+                          value={scheduleForm.doctor || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const doc = doctors.find(d => String(d.doctor?._id || d.doctor || d._id) === val);
+                            setScheduleForm({
+                              ...scheduleForm,
+                              doctor: val,
+                              doctorName: doc ? (doc.doctorName || doc.doctor?.name || '') : scheduleForm.doctorName
+                            });
+                          }}
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        >
+                          <option value="">-- Choose Doctor (Optional) --</option>
+                          {doctors.map(d => {
+                            const val = String(d.doctor?._id || d.doctor || d._id);
+                            return (
+                              <option key={d._id} value={val}>
+                                {d.doctorName || d.doctor?.name || 'Doctor'} {d.specialization ? `(${d.specialization})` : ''}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        {!scheduleForm.doctor && (
+                          <input 
+                            type="text"
+                            placeholder="Or enter doctor name manually"
+                            value={scheduleForm.doctorName}
+                            onChange={(e) => setScheduleForm({ ...scheduleForm, doctorName: e.target.value })}
+                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <input 
+                        type="text"
+                        placeholder="Dr. Rajesh Gupta"
+                        value={scheduleForm.doctorName}
+                        onChange={(e) => setScheduleForm({ ...scheduleForm, doctorName: e.target.value })}
+                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                      />
+                    )}
                   </div>
 
                   <div>
