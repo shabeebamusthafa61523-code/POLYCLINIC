@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { getExpenseCategories, getExpenses, createExpense, updateExpense, deleteExpense, approveOrRejectExpense } from '../../services/accountsService';
 import ExpenseCategoriesTab from './ExpenseCategoriesTab';
 import { 
+  Plus,
   PlusCircle, 
   Search, 
   Calendar, 
