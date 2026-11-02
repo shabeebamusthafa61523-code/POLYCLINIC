@@ -13,10 +13,12 @@ import {
   ArrowRight,
   Filter,
   Activity,
-  X
+  X,
+  CreditCard
 } from 'lucide-react';
 import { polyclinicService } from '../services/polyclinicService';
 import ConfirmationModal from '../components/ConfirmationModal';
+import PatientMedicalCardModal from '../components/PatientMedicalCardModal';
 
 export default function PatientEnquiriesPage() {
   const [patients, setPatients] = useState([]);
@@ -25,6 +27,8 @@ export default function PatientEnquiriesPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedPatientForAppt, setSelectedPatientForAppt] = useState(null);
   const [showApptModal, setShowApptModal] = useState(false);
+  const [selectedPatientForCard, setSelectedPatientForCard] = useState(null);
+  const [showCardModal, setShowCardModal] = useState(false);
 
   const [doctors, setDoctors] = useState([]);
 
@@ -227,15 +231,29 @@ export default function PatientEnquiriesPage() {
                     <td className="py-3.5 px-4 font-semibold text-slate-700 dark:text-slate-300">{patient.bloodGroup || 'O+'}</td>
                     <td className="py-3.5 px-4 max-w-xs truncate text-slate-500">{patient.notes || 'General consultation request'}</td>
                     <td className="py-3.5 px-4">
-                      <button
-                        onClick={() => {
-                          setSelectedPatientForAppt(patient);
-                          setShowApptModal(true);
-                        }}
-                        className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-semibold px-3 py-1.5 rounded-xl text-xs transition border border-emerald-200/80 dark:border-emerald-800/50"
-                      >
-                        <Calendar className="w-3.5 h-3.5" /> Book Appointment
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedPatientForAppt(patient);
+                            setShowApptModal(true);
+                          }}
+                          className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-semibold px-2.5 py-1.5 rounded-xl text-xs transition border border-emerald-200/80 dark:border-emerald-800/50 cursor-pointer"
+                          title="Book Appointment"
+                        >
+                          <Calendar className="w-3.5 h-3.5" /> Book Appt
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setSelectedPatientForCard(patient);
+                            setShowCardModal(true);
+                          }}
+                          className="inline-flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold px-2.5 py-1.5 rounded-xl text-xs transition border border-indigo-200/80 dark:border-indigo-800/50 cursor-pointer shadow-xs"
+                          title="Generate Patient Medical ID Card"
+                        >
+                          <CreditCard className="w-3.5 h-3.5" /> Medical Card
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -478,6 +496,16 @@ export default function PatientEnquiriesPage() {
         variant={confirmModal.variant}
         onConfirm={confirmModal.onConfirm}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+      />
+
+      {/* Patient Medical ID Card Modal */}
+      <PatientMedicalCardModal
+        isOpen={showCardModal}
+        patient={selectedPatientForCard}
+        onClose={() => {
+          setShowCardModal(false);
+          setSelectedPatientForCard(null);
+        }}
       />
     </div>
   );

@@ -31,6 +31,7 @@ export const ALL_SYSTEM_MODULES = [
 
   // --- PATIENT CRM & BOOKING ---
   { label: 'Patient Enquiry CRM', path: '/patient-enquiries', category: 'Patient CRM & Booking', desc: 'Patient lead enquiry registration & appointment conversion' },
+  { label: 'Family', path: '/family', category: 'Patient CRM & Booking', desc: 'Family grouping engine, shared contacts, multi-member records & KPIs' },
   { label: 'Appointments', path: '/appointments', category: 'Patient CRM & Booking', desc: 'Doctor slot booking & appointment management' },
   { label: 'Patient Follow-ups', path: '/patient-followups', category: 'Patient CRM & Booking', desc: 'Post-consultation follow-up reminders & care plans' },
 
@@ -63,7 +64,7 @@ export const ALL_SYSTEM_MODULES = [
 const ROLE_PRESETS = {
   'Full Access Admin': ALL_SYSTEM_MODULES.map(m => m.label),
   'Doctor / Physician': ['Polyclinic Dashboard', 'Appointments', 'Doctor EMR Consultation', 'Digital Prescriptions', 'Laboratory & Diagnostics', 'Patient Follow-ups', 'Personal Payslip', 'Notifications'],
-  'Receptionist': ['Polyclinic Dashboard', 'Reception Queue', 'Patient Enquiry CRM', 'Appointments', 'Billing & Invoices', 'Patient Follow-ups', 'Personal Payslip', 'Notifications'],
+  'Receptionist': ['Polyclinic Dashboard', 'Reception Queue', 'Patient Enquiry CRM', 'Family', 'Appointments', 'Billing & Invoices', 'Patient Follow-ups', 'Personal Payslip', 'Notifications'],
   'Pharmacist': ['Polyclinic Dashboard', 'Pharmacy Inventory', 'Billing & Invoices', 'Digital Prescriptions', 'Personal Payslip', 'Notifications'],
   'Lab Technician': ['Polyclinic Dashboard', 'Laboratory & Diagnostics', 'Personal Payslip', 'Notifications'],
   'Accountant': ['Polyclinic Dashboard', 'Clinic Accounts & Expenses', 'Billing & Invoices', 'Payslips', 'Personal Payslip', 'Notifications'],

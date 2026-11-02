@@ -25,7 +25,9 @@ import {
   getFollowUps,
   createFollowUp,
   updateFollowUp,
-  deleteFollowUp
+  deleteFollowUp,
+  getFamilyUnits,
+  getPatientsByPhone
 } from '../controllers/polyclinic.controller.js';
 
 const router = express.Router();
@@ -36,7 +38,11 @@ router.get('/dashboard', getPolyclinicDashboard);
 // Patients
 router.get('/patients', getPatients);
 router.post('/patients', createPatient);
+router.get('/patients/by-phone/:phone', getPatientsByPhone);
 router.get('/patients/:id', getPatientById);
+
+// Family Grouping Engine
+router.get('/families', getFamilyUnits);
 
 // Appointments
 router.get('/appointments', getAppointments);

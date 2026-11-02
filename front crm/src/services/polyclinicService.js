@@ -32,6 +32,17 @@ export const polyclinicService = {
     const res = await axios.get(`${API_URL}/v1/polyclinic/patients/${id}`, getAuthHeaders());
     return res.data;
   },
+  getPatientsByPhone: async (phone) => {
+    const res = await axios.get(`${API_URL}/v1/polyclinic/patients/by-phone/${encodeURIComponent(phone)}`, getAuthHeaders());
+    return res.data;
+  },
+
+  // Family Units & Grouping Engine
+  getFamilyUnits: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const res = await axios.get(`${API_URL}/v1/polyclinic/families${query ? `?${query}` : ''}`, getAuthHeaders());
+    return res.data;
+  },
 
   // Appointments
   getAppointments: async () => {

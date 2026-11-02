@@ -10,6 +10,7 @@ import FollowUp from '../models/followUp.model.js';
 import DoctorSchedule from '../models/doctorSchedule.model.js';
 import User from '../models/user.model.js';
 import Lead from '../models/lead.model.js';
+import { normalizePhoneNumber, formatDisplayPhone } from '../utils/phone.util.js';
 
 // Seed Initial Healthcare Demo Data if DB is empty
 export const seedPolyclinicData = async () => {
@@ -20,8 +21,10 @@ export const seedPolyclinicData = async () => {
       
       const patients = await Patient.insertMany([
         { patientId: 'PAT-1001', name: 'Rahul Sharma', phone: '+91 9876543210', email: 'rahul@example.com', gender: 'Male', age: 34, bloodGroup: 'O+', address: 'MG Road, Bangalore', medicalHistory: ['Hypertension'], allergies: ['Penicillin'] },
-        { patientId: 'PAT-1002', name: 'Ananya Verma', phone: '+91 9812345678', email: 'ananya@example.com', gender: 'Female', age: 28, bloodGroup: 'A+', address: 'Indiranagar, Bangalore', medicalHistory: ['Asthma'], allergies: ['Dust'] },
-        { patientId: 'PAT-1003', name: 'Vikram Nair', phone: '+91 9900112233', email: 'vikram@example.com', gender: 'Male', age: 45, bloodGroup: 'B+', address: 'Koramangala, Bangalore', medicalHistory: ['Type 2 Diabetes'], allergies: ['None'] }
+        { patientId: 'PAT-1002', name: 'Priya Sharma', phone: '098765 43210', email: 'priya@example.com', gender: 'Female', age: 31, bloodGroup: 'B+', address: 'MG Road, Bangalore', medicalHistory: ['Antenatal Care'], allergies: ['None'] },
+        { patientId: 'PAT-1003', name: 'Aarav Sharma', phone: '9876543210', email: '', gender: 'Male', age: 4, bloodGroup: 'O+', address: 'MG Road, Bangalore', medicalHistory: ['Childhood Asthma'], allergies: ['Dust'] },
+        { patientId: 'PAT-1004', name: 'Ananya Verma', phone: '+91 9812345678', email: 'ananya@example.com', gender: 'Female', age: 28, bloodGroup: 'A+', address: 'Indiranagar, Bangalore', medicalHistory: ['Asthma'], allergies: ['Dust'] },
+        { patientId: 'PAT-1005', name: 'Vikram Nair', phone: '+91 9900112233', email: 'vikram@example.com', gender: 'Male', age: 45, bloodGroup: 'B+', address: 'Koramangala, Bangalore', medicalHistory: ['Type 2 Diabetes'], allergies: ['None'] }
       ]);
 
       // Seed Doctor User
@@ -275,25 +278,21 @@ export const createAppointment = async (req, res) => {
       }
     }
 
-    // Check if patient already has an active/open appointment (Scheduled, Checked-In, In-Consultation)
-    const activeQuery = [];
-    if (req.body.patient) {
-      activeQuery.push({ patient: req.body.patient });
-    }
-    if (patientPhone) {
-      activeQuery.push({ patientPhone });
-    }
-
-    if (activeQuery.length > 0) {
-      const existingActive = await Appointment.findOne({
-        $or: activeQuery,
+    // Allow taking multiple appointments/tokens on the same contact phone number (critical for shared family accounts and multi-doctor visits).
+    // Only guard against exact duplicate slot bookings (same patient + same doctor + same date & timeSlot).
+    if (req.body.patient && req.body.doctor && req.body.date && req.body.timeSlot) {
+      const exactDuplicate = await Appointment.findOne({
+        patient: req.body.patient,
+        doctor: req.body.doctor,
+        date: req.body.date,
+        timeSlot: req.body.timeSlot,
         status: { $in: ['Scheduled', 'Checked-In', 'In-Consultation'] }
       });
 
-      if (existingActive) {
+      if (exactDuplicate) {
         return res.status(400).json({
           success: false,
-          message: `Patient "${patientName || 'this patient'}" already has an active appointment (${existingActive.appointmentNo} - Status: ${existingActive.status}). A patient cannot book more than one active appointment at a time.`
+          message: `Patient "${patientName || 'this patient'}" already has an appointment booked with this doctor at ${req.body.timeSlot} (${exactDuplicate.appointmentNo}).`
         });
       }
     }
@@ -310,13 +309,19 @@ export const createAppointment = async (req, res) => {
     const todayCount = await Appointment.countDocuments({ date: { $gte: dateStart, $lte: dateEnd } });
     const tokenNumber = todayCount + 1;
 
-    const appointment = await Appointment.create({
+    const appointmentPayload = {
       ...req.body,
       appointmentNo,
       tokenNumber,
       patientName,
       patientPhone
-    });
+    };
+
+    if (req.body.status === 'Checked-In' && !appointmentPayload.checkInTime) {
+      appointmentPayload.checkInTime = new Date();
+    }
+
+    const appointment = await Appointment.create(appointmentPayload);
 
     res.status(201).json({ success: true, appointment });
   } catch (err) {
@@ -635,6 +640,186 @@ export const deleteFollowUp = async (req, res) => {
   try {
     await FollowUp.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Follow-up record removed successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// 12. Family Grouping Engine & Unified Family Units
+export const getFamilyUnits = async (req, res) => {
+  try {
+    const { tab = 'shared', search = '', sort = 'members' } = req.query;
+
+    // 1. Fetch all registered patients
+    const patients = await Patient.find().sort({ createdAt: 1 }).lean();
+
+    // 2. Fetch appointment counts & latest visit per patient
+    const appointmentCounts = await Appointment.aggregate([
+      { $group: { _id: '$patient', totalVisits: { $sum: 1 }, lastVisit: { $max: '$date' } } }
+    ]);
+    const visitMap = new Map();
+    appointmentCounts.forEach(a => {
+      if (a._id) visitMap.set(String(a._id), { totalVisits: a.totalVisits, lastVisit: a.lastVisit });
+    });
+
+    // 3. Group by Normalized Phone
+    const groupMap = new Map();
+
+    patients.forEach(patient => {
+      const normalizedPhone = normalizePhoneNumber(patient.phone);
+      if (!normalizedPhone) return;
+
+      const visits = visitMap.get(String(patient._id)) || { totalVisits: 0, lastVisit: null };
+      const enrichedPatient = {
+        ...patient,
+        normalizedPhone,
+        visitCount: visits.totalVisits,
+        lastVisitDate: visits.lastVisit,
+        isPrimary: false
+      };
+
+      if (!groupMap.has(normalizedPhone)) {
+        groupMap.set(normalizedPhone, {
+          normalizedPhone,
+          displayPhone: formatDisplayPhone(normalizedPhone),
+          rawPhone: patient.phone,
+          members: [],
+          totalFamilyVisits: 0,
+          latestFamilyVisit: null,
+          primaryMemberName: '',
+          address: patient.address || ''
+        });
+      }
+
+      const family = groupMap.get(normalizedPhone);
+      family.members.push(enrichedPatient);
+      family.totalFamilyVisits += visits.totalVisits;
+      if (!family.address && patient.address) {
+        family.address = patient.address;
+      }
+      if (visits.lastVisit && (!family.latestFamilyVisit || new Date(visits.lastVisit) > new Date(family.latestFamilyVisit))) {
+        family.latestFamilyVisit = visits.lastVisit;
+      }
+    });
+
+    // 4. Designate Primary contact (earliest registered member)
+    let families = Array.from(groupMap.values()).map(family => {
+      family.members.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+      if (family.members.length > 0) {
+        family.members[0].isPrimary = true;
+        family.primaryMemberName = family.members[0].name;
+      }
+      return family;
+    });
+
+    // 5. Global KPI Computations (across all phone records)
+    const totalPhoneAccounts = families.length;
+    const sharedFamilies = families.filter(f => f.members.length >= 2);
+    const sharedFamilyAccounts = sharedFamilies.length;
+    const familyMembersInSharedGroups = sharedFamilies.reduce((sum, f) => sum + f.members.length, 0);
+    const soloNumbers = families.filter(f => f.members.length === 1).length;
+
+    // 6. Navigation Tab Filtering
+    if (tab === 'shared') {
+      families = families.filter(f => f.members.length >= 2);
+    } else if (tab === 'solo') {
+      families = families.filter(f => f.members.length === 1);
+    }
+
+    // 7. Search Filtering across Phone, Member Names, Patient IDs
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      families = families.filter(f => {
+        const matchesPhone = f.normalizedPhone.includes(q) || f.displayPhone.toLowerCase().includes(q) || (f.rawPhone && f.rawPhone.toLowerCase().includes(q));
+        const matchesMember = f.members.some(m => 
+          (m.name && m.name.toLowerCase().includes(q)) || 
+          (m.patientId && m.patientId.toLowerCase().includes(q)) ||
+          (m.email && m.email.toLowerCase().includes(q))
+        );
+        return matchesPhone || matchesMember;
+      });
+    }
+
+    // 8. Sorting
+    if (sort === 'members') {
+      families.sort((a, b) => b.members.length - a.members.length);
+    } else if (sort === 'phone') {
+      families.sort((a, b) => a.normalizedPhone.localeCompare(b.normalizedPhone));
+    } else if (sort === 'name') {
+      families.sort((a, b) => (a.primaryMemberName || '').localeCompare(b.primaryMemberName || ''));
+    } else if (sort === 'visits') {
+      families.sort((a, b) => b.totalFamilyVisits - a.totalFamilyVisits);
+    }
+
+    res.json({
+      success: true,
+      kpis: {
+        sharedFamilyAccounts,
+        familyMembersInSharedGroups,
+        totalPhoneAccounts,
+        soloNumbers
+      },
+      totalMatchingFamilies: families.length,
+      families
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// 13. Fast Family Lookup by Phone (For Reception Queue & Walk-in Token modal)
+export const getPatientsByPhone = async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const normalizedQuery = normalizePhoneNumber(phone);
+    if (!normalizedQuery || normalizedQuery.length < 5) {
+      return res.json({ success: true, count: 0, isFamily: false, members: [] });
+    }
+
+    // Find all patients and match normalized phone
+    const allPatients = await Patient.find().sort({ createdAt: 1 }).lean();
+    const matched = allPatients.filter(p => normalizePhoneNumber(p.phone) === normalizedQuery);
+
+    if (matched.length === 0) {
+      return res.json({
+        success: true,
+        normalizedPhone: normalizedQuery,
+        displayPhone: formatDisplayPhone(normalizedQuery),
+        isFamily: false,
+        count: 0,
+        members: []
+      });
+    }
+
+    // Fetch visits for matched patients
+    const patientIds = matched.map(m => m._id);
+    const appointmentCounts = await Appointment.aggregate([
+      { $match: { patient: { $in: patientIds } } },
+      { $group: { _id: '$patient', totalVisits: { $sum: 1 }, lastVisit: { $max: '$date' } } }
+    ]);
+    const visitMap = new Map();
+    appointmentCounts.forEach(a => {
+      if (a._id) visitMap.set(String(a._id), { totalVisits: a.totalVisits, lastVisit: a.lastVisit });
+    });
+
+    const members = matched.map((m, idx) => {
+      const v = visitMap.get(String(m._id)) || { totalVisits: 0, lastVisit: null };
+      return {
+        ...m,
+        isPrimary: idx === 0,
+        visitCount: v.totalVisits,
+        lastVisitDate: v.lastVisit
+      };
+    });
+
+    res.json({
+      success: true,
+      normalizedPhone: normalizedQuery,
+      displayPhone: formatDisplayPhone(normalizedQuery),
+      isFamily: members.length >= 2,
+      count: members.length,
+      members
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

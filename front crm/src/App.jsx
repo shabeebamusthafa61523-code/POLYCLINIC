@@ -85,6 +85,7 @@ import ProjectReportsPage from './pages/ProjectReportsPage';
 // Polyclinic Healthcare Module Pages
 import PolyclinicDashboard from './pages/PolyclinicDashboard';
 import PatientEnquiriesPage from './pages/PatientEnquiriesPage';
+import FamilyPage from './pages/FamilyPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import ReceptionQueuePage from './pages/ReceptionQueuePage';
 import DoctorEMRPage from './pages/DoctorEMRPage';
@@ -207,6 +208,7 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><MainLayout><PolyclinicDashboard /></MainLayout></ProtectedRoute>} />
         <Route path="/polyclinic-dashboard" element={<ProtectedRoute><MainLayout><PolyclinicDashboard /></MainLayout></ProtectedRoute>} />
         <Route path="/patient-enquiries" element={<ProtectedRoute><MainLayout><PatientEnquiriesPage /></MainLayout></ProtectedRoute>} />
+        <Route path="/family" element={<ProtectedRoute><MainLayout><FamilyPage /></MainLayout></ProtectedRoute>} />
         <Route path="/appointments" element={<ProtectedRoute><MainLayout><AppointmentsPage /></MainLayout></ProtectedRoute>} />
         <Route path="/reception-queue" element={<ProtectedRoute><MainLayout><ReceptionQueuePage /></MainLayout></ProtectedRoute>} />
         <Route path="/doctor-emr" element={<ProtectedRoute><MainLayout><DoctorEMRPage /></MainLayout></ProtectedRoute>} />

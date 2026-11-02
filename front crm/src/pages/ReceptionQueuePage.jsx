@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { UserCheck, Clock, CheckCircle2, AlertCircle, ArrowRight, RefreshCw, Stethoscope } from 'lucide-react';
 import { polyclinicService } from '../services/polyclinicService';
 import ConfirmationModal from '../components/ConfirmationModal';
+import TakeTokenModal from '../components/TakeTokenModal';
+import { Ticket, PlusCircle } from 'lucide-react';
 
 export default function ReceptionQueuePage() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showTakeTokenModal, setShowTakeTokenModal] = useState(false);
 
   // Confirmation Modal State
   const [confirmModal, setConfirmModal] = useState({
@@ -70,12 +73,20 @@ export default function ReceptionQueuePage() {
           </p>
         </div>
 
-        <button 
-          onClick={fetchQueue}
-          className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition"
-        >
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh Queue
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setShowTakeTokenModal(true)}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition"
+          >
+            <Ticket className="w-4 h-4" /> Take Token
+          </button>
+          <button 
+            onClick={fetchQueue}
+            className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh Queue
+          </button>
+        </div>
       </div>
 
       {/* 3-Column Kanban Board */}
@@ -195,6 +206,15 @@ export default function ReceptionQueuePage() {
         variant={confirmModal.variant}
         onConfirm={confirmModal.onConfirm}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+      />
+
+      {/* Take Token Walk-in Modal */}
+      <TakeTokenModal
+        isOpen={showTakeTokenModal}
+        onClose={() => setShowTakeTokenModal(false)}
+        onSuccess={() => {
+          fetchQueue();
+        }}
       />
     </div>
   );

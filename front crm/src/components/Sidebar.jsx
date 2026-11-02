@@ -96,6 +96,7 @@ const menuItems = [
 
   // --- PATIENT CRM & BOOKING ---
   { icon: PhoneCall, label: 'Patient Enquiry CRM', path: '/patient-enquiries', category: 'Patient CRM & Booking' },
+  { icon: UsersRound, label: 'Family', path: '/family', category: 'Patient CRM & Booking' },
   { icon: Calendar, label: 'Appointments', path: '/appointments', category: 'Patient CRM & Booking' },
   { icon: Clock, label: 'Patient Follow-ups', path: '/patient-followups', category: 'Patient CRM & Booking' },
 
